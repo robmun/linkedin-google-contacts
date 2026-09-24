@@ -58,6 +58,8 @@ s{color:var(--mut)}
 .bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin:12px 0}
 .bar div{height:100%;width:0;background:var(--acc);transition:width .2s}
 [hidden]{display:none!important}
+button.mini{font-size:12px;padding:2px 8px;margin-left:8px}
+li.ign{color:var(--mut)}
 </style>
 </head>
 <body>
@@ -82,6 +84,12 @@ s{color:var(--mut)}
     <h2><span class="num">2</span> LinkedIn-export</h2>
     <div id="drop" class="drop">Sleep <b>Connections.csv</b> hierheen of <label class="link">kies het bestand<input type="file" id="file" accept=".csv,text/csv" hidden></label></div>
     <p id="liStatus" class="status" style="margin:8px 0 0"></p>
+  </section>
+
+  <section class="card">
+    <h2>Onthouden keuzes</h2>
+    <p class="hint">Wat je op “Niet meer voorstellen” of “Nooit toevoegen” zet, onthoudt de app in deze browser. Sla het af en toe op als bestand: dan raak je het niet kwijt als je je browsergegevens wist of een andere computer gebruikt.</p>
+    <div class="row"><button class="ghost" id="btnIgnSave">Keuzes opslaan als bestand</button><label class="link">Keuzes laden uit bestand<input type="file" id="ignFile" accept=".json,application/json" hidden></label><span id="ignInfo" class="status"></span></div>
   </section>
 
   <section class="card" id="results" hidden>
@@ -303,18 +311,83 @@ function gKeys(p) {
   return { full: out, fuzzy: fz };
 }
 
+/* ---------- onthouden keuzes ("niet meer voorstellen") ---------- */
+const IGN_KEY = 'li2g.ignored';
+let ignored = {};
+try { ignored = JSON.parse(localStorage.getItem(IGN_KEY) || '{}') || {}; } catch (e) { ignored = {}; }
+function saveIgnored() { try { localStorage.setItem(IGN_KEY, JSON.stringify(ignored)); } catch (e) {} updateIgnInfo(); }
+function personKey(li) { const s = liSlug(li.url); return s ? 'in:' + s : 'nm:' + keysFor(li.first, li.last).full; }
+const ignVal = c => c.k === 'url' ? liSlug(c.to) : normText(c.to);
+function isIgnoredChange(li, c) { const r = ignored[personKey(li)]; return !!r && r[c.k] === ignVal(c); }
+const isIgnoredPerson = li => !!ignored[personKey(li)]?.person;
+function ignore(li, field, value) {
+  const k = personKey(li);
+  ignored[k] = { ...(ignored[k] || {}), name: [li.first, li.last].join(' ').trim(), [field]: value };
+  saveIgnored();
+}
+function unignore(li, field) {
+  const k = personKey(li), r = ignored[k]; if (!r) return;
+  delete r[field];
+  if (!Object.keys(r).some(x => x !== 'name')) delete ignored[k];
+  saveIgnored();
+}
+function updateIgnInfo() {
+  const n = Object.keys(ignored).length;
+  $('#ignInfo').textContent = n ? `Keuzes onthouden voor ${n} ${n === 1 ? 'persoon' : 'personen'}.` : 'Nog geen onthouden keuzes.';
+  $('#btnIgnSave').disabled = !n;
+}
+updateIgnInfo();
+$('#btnIgnSave').addEventListener('click', () => {
+  const data = { app: 'linkedin-google-contacts', versie: 1, opgeslagen: new Date().toISOString(), ignored };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'linkedin-keuzes-' + new Date().toISOString().slice(0, 10) + '.json';
+  a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+});
+$('#ignFile').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    try {
+      const d = JSON.parse(rd.result), src = d.ignored || d;
+      if (typeof src !== 'object' || Array.isArray(src)) throw new Error();
+      for (const [k, v] of Object.entries(src)) ignored[k] = { ...(ignored[k] || {}), ...v };
+      saveIgnored();
+      if (state.items.length) { state.items.forEach(refreshItem); render(); }
+      $('#ignInfo').textContent += ' Bestand geladen.';
+    } catch (err) { $('#ignInfo').textContent = 'Dit is geen geldig keuzebestand.'; }
+    e.target.value = '';
+  };
+  rd.readAsText(f);
+});
+
 /* ---------- vergelijken ---------- */
 function diff(li, gp) {
   const ch = [];
   const o = primaryOrg(gp);
   if ((li.company && !sameCompany(li.company, o?.name)) || (li.position && normText(li.position) !== normText(o?.title))) {
-    ch.push({ k: 'org', label: 'Functie/werkgever', from: fmtOrg(o?.title, o?.name), to: fmtOrg(li.position || o?.title, li.company || o?.name), on: true });
+    ch.push({ k: 'org', label: 'Functie/werkgever', from: fmtOrg(o?.title, o?.name), to: fmtOrg(li.position || o?.title, li.company || o?.name), on: false });
   }
   const slug = liSlug(li.url);
-  if (slug && !(gp.urls || []).some(u => liSlug(u.value) === slug)) ch.push({ k: 'url', label: 'LinkedIn-link', from: '', to: li.url, on: true });
+  if (slug && !(gp.urls || []).some(u => liSlug(u.value) === slug)) ch.push({ k: 'url', label: 'LinkedIn-link', from: '', to: li.url, on: false });
   const em = li.email.toLowerCase();
-  if (em && !(gp.emailAddresses || []).some(e => (e.value || '').toLowerCase() === em)) ch.push({ k: 'email', label: 'E-mailadres', from: '', to: li.email, on: true });
+  if (em && !(gp.emailAddresses || []).some(e => (e.value || '').toLowerCase() === em)) ch.push({ k: 'email', label: 'E-mailadres', from: '', to: li.email, on: false });
   return ch;
+}
+function applyChanges(it, gp) {
+  const full = gp ? diff(it.li, gp) : [];
+  it.changes = full.filter(c => !isIgnoredChange(it.li, c));
+  it.ignChanges = full.filter(c => isIgnoredChange(it.li, c));
+}
+const targetRes = it => it.status === 'match' ? it.gp : (it.status === 'doubt' && it.choice && it.choice !== 'new' ? it.choice : null);
+function refreshItem(it) {
+  if (it.result?.ok) return;
+  const res = targetRes(it);
+  const prevOn = new Map(it.changes.map(c => [c.k, c.on]));
+  applyChanges(it, res ? state.gByRes.get(res) : null);
+  it.changes.forEach(c => { if (prevOn.has(c.k)) c.on = prevOn.get(c.k); });
+  it.sel = res ? it.changes.some(c => c.on) : (it.sel && !isIgnoredPerson(it.li));
 }
 
 function maybeCompare() {
@@ -327,7 +400,7 @@ function maybeCompare() {
     const k = gKeys(p); k.full.forEach(x => add(byName, x, p)); k.fuzzy.forEach(x => add(byFuzzy, x, p));
   }
   state.items = state.li.map((li, id) => {
-    const it = { id, li, status: 'new', gp: null, cands: [], reason: '', changes: [], sel: false, choice: '', result: null };
+    const it = { id, li, status: 'new', gp: null, cands: [], reason: '', changes: [], ignChanges: [], sel: false, choice: '', result: null };
     const k = keysFor(li.first, li.last);
     const tries = [['e-mail', byEmail.get(li.email.toLowerCase())], ['LinkedIn-link', byUrl.get(liSlug(li.url))], ['naam', byName.get(k.full)]];
     for (const [why, hits] of tries) {
@@ -348,7 +421,7 @@ function maybeCompare() {
     if (it.status === 'match' && it.reason === 'naam' && nameHits.get(it.gp) > 1) {
       it.status = 'doubt'; it.cands = [it.gp]; it.reason = 'meerdere LinkedIn-connecties met deze naam'; it.gp = null;
     }
-    if (it.status === 'match') { it.changes = diff(it.li, state.gByRes.get(it.gp)); it.sel = it.changes.length > 0; }
+    if (it.status === 'match') applyChanges(it, state.gByRes.get(it.gp));
   });
   $('#results').hidden = false; $('#applyBar').hidden = false;
   if (!state.items.some(i => cat(i) === state.tab)) state.tab = ['changes', 'doubt', 'new', 'same'].find(t => state.items.some(i => cat(i) === t)) || 'changes';
@@ -356,15 +429,18 @@ function maybeCompare() {
 }
 
 function cat(it) {
+  if (!it.result?.ok && (it.status === 'new' || it.status === 'doubt') && isIgnoredPerson(it.li)) return 'ignored';
   if (it.status === 'doubt') return 'doubt';
   if (it.status === 'new') return 'new';
-  return it.changes.length || it.result ? 'changes' : 'same';
+  if (it.changes.length || it.result) return 'changes';
+  return it.ignChanges.length ? 'ignored' : 'same';
 }
 const TABS = {
-  changes: ['Wijzigingen', 'Gevonden in Google Contacts met iets nieuws van LinkedIn. Vink per persoon en per veld aan wat je wilt bijwerken.'],
+  changes: ['Wijzigingen', 'Gevonden in Google Contacts met iets nieuws van LinkedIn. Er staat niets aangevinkt: vink per persoon of per veld aan wat je wilt bijwerken. “Niet meer voorstellen” onthoudt dat je dit voorstel niet wilt.'],
   doubt: ['Twijfelgevallen', 'Niet zeker wie dit in Google Contacts is. Kies het juiste contact, maak een nieuw contact aan, of sla over.'],
-  new: ['Nieuw', 'Staat nog niet in Google Contacts. Standaard niet aangevinkt: kies zelf wie je wilt toevoegen.'],
-  same: ['Up-to-date', 'Gevonden en niets te wijzigen.']
+  new: ['Nieuw', 'Staat nog niet in Google Contacts. Er staat niets aangevinkt: kies zelf wie je wilt toevoegen. “Nooit toevoegen” onthoudt dat je deze persoon niet wilt.'],
+  same: ['Up-to-date', 'Gevonden en niets te wijzigen.'],
+  ignored: ['Genegeerd', 'Voorstellen waarvan je hebt gezegd: niet meer voorstellen. Verandert de informatie op LinkedIn, dan krijg je het nieuwe voorstel wél weer te zien. “Terugzetten” maakt je keuze ongedaan.']
 };
 
 function matchesQuery(it) {
@@ -375,12 +451,12 @@ function matchesQuery(it) {
 function visible() { return state.items.filter(it => cat(it) === state.tab && matchesQuery(it)); }
 
 function render() {
-  const counts = { changes: 0, doubt: 0, new: 0, same: 0 };
+  const counts = { changes: 0, doubt: 0, new: 0, same: 0, ignored: 0 };
   state.items.forEach(it => counts[cat(it)]++);
   $('#tabs').innerHTML = Object.entries(TABS).map(([k, [lbl]]) =>
     `<button class="tab ${k === state.tab ? 'on' : ''}" data-tab="${k}">${lbl}<span class="c">${counts[k]}</span></button>`).join('');
   $('#tabHint').textContent = TABS[state.tab][1];
-  const canSelect = state.tab !== 'same';
+  const canSelect = state.tab !== 'same' && state.tab !== 'ignored';
   $('#selAll').hidden = $('#selNone').hidden = !canSelect;
   const list = visible();
   $('#list').innerHTML = list.length ? list.map(rowHtml).join('') : '<div class="empty">Niets in deze lijst.</div>';
@@ -398,8 +474,11 @@ function liLine(li) {
   return bits.map(esc).join(' · ');
 }
 function changesHtml(it) {
-  return `<ul class="changes">${it.changes.map((c, i) => `<li><label><input type="checkbox" data-act="chg" data-id="${it.id}" data-i="${i}" ${c.on ? 'checked' : ''} ${it.result?.ok ? 'disabled' : ''}>
-    ${esc(c.label)}: ${c.from ? `<s>${esc(c.from)}</s> → ` : '+ '}<b>${esc(c.to)}</b></label></li>`).join('')}</ul>`;
+  const done = it.result?.ok;
+  const act = it.changes.map((c, i) => `<li><label><input type="checkbox" data-act="chg" data-id="${it.id}" data-i="${i}" ${c.on ? 'checked' : ''} ${done ? 'disabled' : ''}>
+    ${esc(c.label)}: ${c.from ? `<s>${esc(c.from)}</s> → ` : '+ '}<b>${esc(c.to)}</b></label>${done ? '' : `<button class="ghost mini" data-act="ign" data-id="${it.id}" data-i="${i}">Niet meer voorstellen</button>`}</li>`).join('');
+  const ign = done ? '' : (it.ignChanges || []).map(c => `<li class="ign">Genegeerd — ${esc(c.label)}: ${esc(c.to)}<button class="ghost mini" data-act="unign" data-id="${it.id}" data-k="${c.k}">Terugzetten</button></li>`).join('');
+  return `<ul class="changes">${act}${ign}</ul>`;
 }
 function rowHtml(it) {
   const li = it.li, name = esc([li.first, li.last].join(' '));
@@ -408,24 +487,35 @@ function rowHtml(it) {
   const cb = `<input type="checkbox" data-act="sel" data-id="${it.id}" ${it.sel ? 'checked' : ''} ${done ? 'disabled' : ''}>`;
   const cls = `item ${done ? 'done' : ''}`;
   const c = cat(it);
+  const ignP = done ? '' : `<button class="ghost mini" data-act="ignp" data-id="${it.id}">${it.status === 'new' ? 'Nooit toevoegen' : 'Niet meer voorstellen'}</button>`;
   if (c === 'same') {
     const gp = state.gByRes.get(it.gp);
     return `<div class="${cls}"><div class="head"><span class="name">${name}</span>${link}<span class="badge">via ${esc(it.reason)}</span></div>
       <div class="sub">Google: ${esc(gName(gp))} · ${esc(fmtOrg(primaryOrg(gp)?.title, primaryOrg(gp)?.name))}</div></div>`;
   }
+  if (c === 'ignored') {
+    if (isIgnoredPerson(li)) {
+      return `<div class="${cls}"><div class="head"><span class="name">${name}</span>${link}<span class="badge warn">${it.status === 'new' ? 'nooit toevoegen' : 'niet meer voorstellen'}</span>
+        <button class="ghost mini" data-act="unignp" data-id="${it.id}">Terugzetten</button></div><div class="sub">${liLine(li)}</div></div>`;
+    }
+    const gp = state.gByRes.get(it.gp);
+    return `<div class="${cls}"><div class="head"><span class="name">${name}</span>${link}<span class="badge">via ${esc(it.reason)}</span></div>
+      <div class="sub">In Google als: ${esc(gName(gp))}</div>${changesHtml(it)}</div>`;
+  }
   if (c === 'new') {
-    return `<div class="${cls}"><div class="head"><label>${cb} <span class="name">${name}</span></label>${link}${resultBadge(it)}</div>
+    return `<div class="${cls}"><div class="head"><label>${cb} <span class="name">${name}</span></label>${link}${resultBadge(it)}${ignP}</div>
       <div class="sub">${liLine(li)}</div></div>`;
   }
   if (c === 'doubt') {
     const opts = it.cands.map(r => { const p = state.gByRes.get(r); const o = primaryOrg(p);
       const extra = [fmtOrg(o?.title, o?.name), p.emailAddresses?.[0]?.value].filter(x => x && x !== '—').join(', ');
       return `<option value="${esc(r)}" ${it.choice === r ? 'selected' : ''}>${esc(gName(p))}${extra ? ' — ' + esc(extra) : ''}</option>`; }).join('');
-    return `<div class="${cls}"><div class="head"><label>${cb} <span class="name">${name}</span></label>${link}<span class="badge warn">${esc(it.reason)}</span>${resultBadge(it)}</div>
+    const chosen = it.choice && it.choice !== 'new';
+    return `<div class="${cls}"><div class="head"><label>${cb} <span class="name">${name}</span></label>${link}<span class="badge warn">${esc(it.reason)}</span>${resultBadge(it)}${ignP}</div>
       <div class="sub">LinkedIn: ${liLine(li)}</div>
       <div class="sub"><select data-act="choice" data-id="${it.id}" ${done ? 'disabled' : ''}>
         <option value="">— overslaan —</option>${opts}<option value="new" ${it.choice === 'new' ? 'selected' : ''}>➕ Nieuw contact aanmaken</option></select></div>
-      ${it.choice && it.choice !== 'new' ? (it.changes.length ? changesHtml(it) : '<div class="sub">Dit contact is al up-to-date.</div>') : ''}</div>`;
+      ${chosen ? (it.changes.length || it.ignChanges.length ? changesHtml(it) : '<div class="sub">Dit contact is al up-to-date.</div>') : ''}</div>`;
   }
   const gp = state.gByRes.get(it.gp);
   return `<div class="${cls}"><div class="head"><label>${cb} <span class="name">${name}</span></label>${link}<span class="badge">via ${esc(it.reason)}</span>${resultBadge(it)}</div>
@@ -437,13 +527,25 @@ $('#tabs').addEventListener('click', e => { const b = e.target.closest('[data-ta
 $('#search').addEventListener('input', e => { state.q = e.target.value; render(); });
 $('#list').addEventListener('change', e => {
   const t = e.target, it = state.items[+t.dataset.id]; if (!it) return;
-  if (t.dataset.act === 'sel') it.sel = t.checked;
+  if (t.dataset.act === 'sel') { it.sel = t.checked; it.changes.forEach(c => c.on = t.checked); }
   if (t.dataset.act === 'chg') { it.changes[+t.dataset.i].on = t.checked; it.sel = it.changes.some(c => c.on); }
   if (t.dataset.act === 'choice') {
     it.choice = t.value;
-    it.changes = it.choice && it.choice !== 'new' ? diff(it.li, state.gByRes.get(it.choice)) : [];
-    it.sel = it.choice === 'new' || it.changes.length > 0;
+    const res = targetRes(it);
+    applyChanges(it, res ? state.gByRes.get(res) : null);
+    it.sel = it.choice === 'new';
   }
+  render();
+});
+$('#list').addEventListener('click', e => {
+  const b = e.target.closest('button[data-act]'); if (!b) return;
+  const it = state.items[+b.dataset.id]; if (!it) return;
+  const a = b.dataset.act;
+  if (a === 'ign') { const c = it.changes[+b.dataset.i]; ignore(it.li, c.k, ignVal(c)); }
+  if (a === 'unign') unignore(it.li, b.dataset.k);
+  if (a === 'ignp') { ignore(it.li, 'person', true); it.sel = false; }
+  if (a === 'unignp') unignore(it.li, 'person');
+  state.items.forEach(refreshItem);
   render();
 });
 function setAll(v) {
@@ -463,6 +565,7 @@ function plan() {
   const ups = [], crs = [];
   for (const it of state.items) {
     if (!it.sel || it.result?.ok) continue;
+    if ((it.status === 'new' || it.status === 'doubt') && isIgnoredPerson(it.li)) continue;
     if (it.status === 'new' || (it.status === 'doubt' && it.choice === 'new')) crs.push(it);
     else if ((it.status === 'match' || (it.status === 'doubt' && it.choice)) && it.changes.some(c => c.on)) ups.push(it);
   }

@@ -54,12 +54,23 @@ Het kan tot 5 minuten duren voordat een nieuwe JavaScript-bron werkt. Krijg je `
    - Vink **toegang tot je contacten** aan.
    - Klik daarna op **Back-up downloaden**. Daarmee heb je een kopie van alles zoals het was.
 3. **Stap 2:** sleep `Connections.csv` in het vak.
-4. **Stap 3:** loop de tabbladen door:
-   - **Wijzigingen:** de persoon staat al in Google en LinkedIn heeft nieuwere gegevens (functie/werkgever, LinkedIn-link, e-mail). Standaard aangevinkt. Je kunt per veld het vinkje weghalen.
+4. **Stap 3:** loop de tabbladen door. **Er staat nergens iets vooraf aangevinkt**: alleen wat jij aanvinkt wordt doorgevoerd.
+   - **Wijzigingen:** de persoon staat al in Google en LinkedIn heeft nieuwere gegevens (functie/werkgever, LinkedIn-link, e-mail). Vink de persoon aan (dan gaan alle velden mee) of vink losse velden aan.
    - **Twijfelgevallen:** meerdere contacten met dezelfde naam, of een naam die er alleen op lijkt (bijvoorbeeld "Eva Mulder" en "Eva van Mulder"). Kies het juiste contact, kies **Nieuw contact aanmaken**, of laat het op overslaan staan.
-   - **Nieuw:** de persoon staat nog niet in Google. Standaard *niet* aangevinkt; vink zelf aan wie je wilt toevoegen. Nieuwe contacten krijgen het label **LinkedIn**, zodat je ze makkelijk terugvindt.
+   - **Nieuw:** de persoon staat nog niet in Google. Vink aan wie je wilt toevoegen. Nieuwe contacten krijgen het label **LinkedIn**, zodat je ze makkelijk terugvindt.
    - **Up-to-date:** hier hoeft niets te gebeuren.
+   - **Genegeerd:** alles waarvan je hebt gezegd dat je het niet meer voorgesteld wilt krijgen (zie hieronder).
 5. Klik **Doorvoeren**. Google staat ongeveer 60 wijzigingen per minuut toe, dus 200 wijzigingen duren zo'n 3–4 minuten. Laat het tabblad open tot het klaar is.
+
+### "Niet meer voorstellen" en "Nooit toevoegen"
+
+Een vinkje weghalen betekent: *nu niet*. Wil je een voorstel nooit meer zien, klik dan op:
+- **Niet meer voorstellen** naast een voorgestelde wijziging, of bij een twijfelgeval;
+- **Nooit toevoegen** bij iemand in het tabblad Nieuw.
+
+De app onthoudt precies de waarde die je afwees. Wijs je "Manager @ Bol" af en wordt iemand later "Directeur @ Bol", dan krijg je dat nieuwe voorstel wél te zien. In het tabblad **Genegeerd** kun je een keuze met **Terugzetten** ongedaan maken.
+
+Deze keuzes worden in je browser bewaard. Klik na een sessie op **Keuzes opslaan als bestand** en bewaar dat bestand (bijvoorbeeld in Google Drive). Heb je je browsergegevens gewist of gebruik je een andere computer, dan zet **Keuzes laden uit bestand** alles terug.
 
 Draai het elk kwartaal opnieuw met een verse LinkedIn-export. Contacten die je al hebt bijgewerkt komen dan onder **Up-to-date**.
 
