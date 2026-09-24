@@ -43,8 +43,8 @@ Het kan tot 5 minuten duren voordat een nieuwe JavaScript-bron werkt. Krijg je `
 ## Deel 3 — LinkedIn-export aanvragen
 
 1. Ga in LinkedIn naar **Ik → Instellingen en privacy → Gegevensprivacy → Een kopie van je gegevens ophalen**.
-2. Kies **Wil je iets specifieks?**, vink alleen **Connecties** aan en klik **Archief aanvragen**.
-3. Na een paar minuten tot een dag krijg je een mail. Download de zip en pak hem uit. Je hebt het bestand `Connections.csv` nodig.
+2. Kies de **eerste** optie: **Download larger data archive, including connections…** (bij "Want something in particular?" staat Connecties niet meer in de lijst). Klik **Request archive**.
+3. Na een paar minuten tot een dag krijg je een mail (vaak eerst een snelle mail met een deel, later de rest). Download de zip en pak hem uit. Je hebt alleen het bestand `Connections.csv` nodig; zit het nog niet in de eerste zip, wacht dan op de tweede mail.
 
 ## Gebruiken
 

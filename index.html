@@ -127,7 +127,9 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const state = { token: null, tokenExp: 0, google: null, gByRes: new Map(), li: null, items: [], tab: 'changes', q: '' };
 
 /* ---------- instellingen ---------- */
-try { $('#clientId').value = localStorage.getItem('li2g.clientId') || ''; } catch (e) {}
+const DEFAULT_CLIENT_ID = '21208591537-p1ks36o6n09i6pik7m2nua7mtg10u2ru.apps.googleusercontent.com';
+$('#clientId').value = DEFAULT_CLIENT_ID;
+try { $('#clientId').value = localStorage.getItem('li2g.clientId') || DEFAULT_CLIENT_ID; } catch (e) {}
 $('#clientId').addEventListener('change', () => {
   try { localStorage.setItem('li2g.clientId', $('#clientId').value.trim()); } catch (e) {}
 });
