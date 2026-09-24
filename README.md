@@ -54,7 +54,7 @@ Het kan tot 5 minuten duren voordat een nieuwe JavaScript-bron werkt. Krijg je `
    - Vink **toegang tot je contacten** aan.
    - Klik daarna op **Back-up downloaden**. Daarmee heb je een kopie van alles zoals het was.
 3. **Stap 2:** sleep `Connections.csv` in het vak.
-4. **Stap 3:** loop de tabbladen door. **Er staat nergens iets vooraf aangevinkt**: alleen wat jij aanvinkt wordt doorgevoerd.
+4. **Stap 3:** loop de tabbladen door. Alleen wat aangevinkt is wordt doorgevoerd. Vooraf aangevinkt is alléén de **LinkedIn-link bij een zekere koppeling** (groen label "zekere koppeling"). Zeker betekent: het e-mailadres komt overeen, jij hebt de persoon zelf gekoppeld, of de naam klopt én het bedrijf klopt (volgens de werkgever of het e-maildomein in Google). Wil je dat niet, zet dan onderaan het vinkje **LinkedIn-link automatisch aanvinken** uit.
    - **Wijzigingen:** de persoon staat al in Google en LinkedIn heeft nieuwere gegevens (functie/werkgever, LinkedIn-link, e-mail). Vink de persoon aan (dan gaan alle velden mee) of vink losse velden aan.
    - **Koppelen aan bestaand contact…** (bij Nieuw en Twijfelgevallen): herkent de app iemand niet, maar staat hij wél in Google Contacts, klik dan op deze knop, zoek op naam, e-mail of bedrijf en kies het juiste contact. De persoon verhuist naar Wijzigingen. De app onthoudt de koppeling (en ziet hem ook via de LinkedIn-link als je die meeneemt). Verkeerd gekoppeld? Klik **Ontkoppelen**.
    - **Twijfelgevallen:** meerdere contacten met dezelfde naam, of een naam die er alleen op lijkt (bijvoorbeeld "Eva Mulder" en "Eva van Mulder"). Kies het juiste contact, kies **Nieuw contact aanmaken**, of laat het op overslaan staan.

@@ -9,22 +9,22 @@
 :root{--bg:#f6f7f9;--card:#fff;--fg:#1d2330;--mut:#667085;--line:#e3e6ea;--acc:#0a66c2;--acc2:#e8f1fb;--ok:#127a3a;--okbg:#e6f4ea;--warn:#9a5b00;--warnbg:#fff4e0;--err:#b42318;--errbg:#fdecea}
 @media (prefers-color-scheme:dark){:root{--bg:#14171c;--card:#1d2128;--fg:#e8eaed;--mut:#9aa3ae;--line:#2e343d;--acc:#5aa9f5;--acc2:#1c2c3f;--ok:#6fd08f;--okbg:#17301f;--warn:#f0b35a;--warnbg:#33260f;--err:#ff8a80;--errbg:#3a1a18}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-header{max-width:980px;margin:0 auto;padding:28px 16px 8px}
-h1{margin:0 0 4px;font-size:24px}
+body{margin:0;background:var(--bg);color:var(--fg);font:18px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{max-width:1100px;margin:0 auto;padding:28px 16px 8px}
+h1{margin:0 0 4px;font-size:30px}
 header p{margin:0;color:var(--mut)}
-main{max-width:980px;margin:0 auto;padding:8px 16px 120px}
+main{max-width:1100px;margin:0 auto;padding:8px 16px 170px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0}
-h2{margin:0 0 12px;font-size:17px;display:flex;align-items:center;gap:10px}
-.num{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--acc);color:#fff;font-size:14px}
-label.field{display:block;margin-bottom:10px;font-size:13px;color:var(--mut)}
+h2{margin:0 0 12px;font-size:21px;display:flex;align-items:center;gap:10px}
+.num{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--acc);color:#fff;font-size:16px}
+label.field{display:block;margin-bottom:10px;font-size:15px;color:var(--mut)}
 input[type=text],input[type=search],select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
 label.field input{display:block;width:100%;margin-top:4px}
 button{font:inherit;border-radius:8px;border:1px solid var(--acc);background:var(--acc);color:#fff;padding:8px 14px;cursor:pointer}
 button.ghost{background:transparent;color:var(--acc)}
 button:disabled{opacity:.45;cursor:default}
 .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-.status{color:var(--mut);font-size:13px}
+.status{color:var(--mut);font-size:15px}
 .status.ok{color:var(--ok)}.status.err{color:var(--err)}
 .drop{border:2px dashed var(--line);border-radius:10px;padding:22px;text-align:center;color:var(--mut)}
 .drop.over{border-color:var(--acc);background:var(--acc2)}
@@ -35,30 +35,31 @@ button:disabled{opacity:.45;cursor:default}
 .tab .c{opacity:.7;margin-left:4px}
 .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
 .toolbar input{flex:1;min-width:180px}
-.hint{font-size:13px;color:var(--mut);margin:0 0 10px}
+.hint{font-size:15px;color:var(--mut);margin:0 0 10px}
 .item{border-top:1px solid var(--line);padding:12px 2px}
 .item:first-child{border-top:0}
 .item.done{opacity:.65}
 .head{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .name{font-weight:600}
-.head a{font-size:13px;color:var(--acc)}
-.badge{font-size:12px;border-radius:999px;padding:1px 8px;background:var(--acc2);color:var(--acc)}
+.head a{font-size:15px;color:var(--acc)}
+.badge{font-size:14px;border-radius:999px;padding:1px 8px;background:var(--acc2);color:var(--acc)}
 .badge.warn{background:var(--warnbg);color:var(--warn)}
 .badge.ok{background:var(--okbg);color:var(--ok)}
 .badge.err{background:var(--errbg);color:var(--err)}
-.sub{font-size:13px;color:var(--mut);margin:3px 0 0 26px}
+.sub{font-size:15px;color:var(--mut);margin:3px 0 0 26px}
 ul.changes{list-style:none;margin:6px 0 0 26px;padding:0}
-ul.changes li{font-size:14px;margin:3px 0}
+ul.changes li{font-size:16px;margin:3px 0}
 s{color:var(--mut)}
 .empty{color:var(--mut);padding:16px 2px}
 .applybar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:12px 16px}
-.applybar .in{max-width:980px;margin:0 auto;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.applybar .in{max-width:1100px;margin:0 auto;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:grid;place-items:center;padding:16px}
 .overlay .box{background:var(--card);border-radius:12px;padding:20px;width:min(460px,100%)}
 .bar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin:12px 0}
 .bar div{height:100%;width:0;background:var(--acc);transition:width .2s}
 [hidden]{display:none!important}
-button.mini{font-size:12px;padding:2px 8px;margin-left:8px}
+input[type=checkbox]{width:19px;height:19px;vertical-align:-3px;accent-color:var(--acc)}
+button.mini{font-size:14px;padding:2px 8px;margin-left:8px}
 li.ign{color:var(--mut)}
 .linkbox{margin-top:8px;max-width:620px}
 .linkbox input{width:100%;margin-bottom:6px}
@@ -111,7 +112,8 @@ button.pick:hover{border-color:var(--acc)}
 
 <div class="applybar" id="applyBar" hidden>
   <div class="in">
-    <label><input type="checkbox" id="useLabel" checked> Nieuwe contacten het label “LinkedIn” geven</label>
+    <div><label><input type="checkbox" id="autoUrl"> LinkedIn-link automatisch aanvinken als de koppeling zeker is</label><br>
+    <label><input type="checkbox" id="useLabel" checked> Nieuwe contacten het label “LinkedIn” geven</label></div>
     <span id="applySummary" class="status"></span>
     <button id="btnApply" disabled>Doorvoeren</button>
   </div>
@@ -394,9 +396,12 @@ const targetRes = it => it.status === 'match' ? it.gp : (it.status === 'doubt' &
 function refreshItem(it) {
   if (it.result?.ok) return;
   const res = targetRes(it);
-  const prevOn = new Map(it.changes.map(c => [c.k, c.on]));
+  const prev = new Map(it.changes.map(c => [c.k, c]));
   applyChanges(it, res ? state.gByRes.get(res) : null);
-  it.changes.forEach(c => { if (prevOn.has(c.k)) c.on = prevOn.get(c.k); });
+  it.changes.forEach(c => {
+    if (prev.has(c.k)) { c.on = prev.get(c.k).on; c.auto = prev.get(c.k).auto; }
+    else if (c.k === 'url') { c.auto = isConfident(it, res ? state.gByRes.get(res) : null); if (c.auto) c.on = autoUrl; }
+  });
   it.sel = res ? it.changes.some(c => c.on) : (it.sel && !isIgnoredPerson(it.li));
 }
 
@@ -434,7 +439,7 @@ function maybeCompare() {
     if (it.status === 'match' && it.reason === 'naam' && nameHits.get(it.gp) > 1) {
       it.status = 'doubt'; it.cands = [it.gp]; it.reason = 'meerdere LinkedIn-connecties met deze naam'; it.gp = null;
     }
-    if (it.status === 'match') applyChanges(it, state.gByRes.get(it.gp));
+    if (it.status === 'match') { applyChanges(it, state.gByRes.get(it.gp)); autoTick(it); }
   });
   $('#results').hidden = false; $('#applyBar').hidden = false;
   if (!state.items.some(i => cat(i) === state.tab)) state.tab = ['changes', 'doubt', 'new', 'same'].find(t => state.items.some(i => cat(i) === t)) || 'changes';
@@ -449,7 +454,7 @@ function cat(it) {
   return it.ignChanges.length ? 'ignored' : 'same';
 }
 const TABS = {
-  changes: ['Wijzigingen', 'Gevonden in Google Contacts met iets nieuws van LinkedIn. Er staat niets aangevinkt: vink per persoon of per veld aan wat je wilt bijwerken. “Niet meer voorstellen” onthoudt dat je dit voorstel niet wilt.'],
+  changes: ['Wijzigingen', 'Gevonden in Google Contacts met iets nieuws van LinkedIn. Alleen LinkedIn-links bij zekere koppelingen staan al aangevinkt (zie onderaan); de rest vink je zelf aan, per persoon of per veld. “Niet meer voorstellen” onthoudt dat je dit voorstel niet wilt.'],
   doubt: ['Twijfelgevallen', 'Niet zeker wie dit in Google Contacts is. Kies het juiste contact, maak een nieuw contact aan, of sla over.'],
   new: ['Nieuw', 'Staat nog niet in Google Contacts. Er staat niets aangevinkt: kies zelf wie je wilt toevoegen. “Nooit toevoegen” onthoudt dat je deze persoon niet wilt.'],
   same: ['Up-to-date', 'Gevonden en niets te wijzigen.'],
@@ -489,7 +494,7 @@ function liLine(li) {
 function changesHtml(it) {
   const done = it.result?.ok;
   const act = it.changes.map((c, i) => `<li><label><input type="checkbox" data-act="chg" data-id="${it.id}" data-i="${i}" ${c.on ? 'checked' : ''} ${done ? 'disabled' : ''}>
-    ${esc(c.label)}: ${c.from ? `<s>${esc(c.from)}</s> → ` : '+ '}<b>${esc(c.to)}</b></label>${done ? '' : `<button class="ghost mini" data-act="ign" data-id="${it.id}" data-i="${i}">Niet meer voorstellen</button>`}</li>`).join('');
+    ${esc(c.label)}: ${c.from ? `<s>${esc(c.from)}</s> → ` : '+ '}<b>${esc(c.to)}</b></label>${c.auto && c.on && !done ? ' <span class="badge ok">zekere koppeling</span>' : ''}${done ? '' : `<button class="ghost mini" data-act="ign" data-id="${it.id}" data-i="${i}">Niet meer voorstellen</button>`}</li>`).join('');
   const ign = done ? '' : (it.ignChanges || []).map(c => `<li class="ign">Genegeerd — ${esc(c.label)}: ${esc(c.to)}<button class="ghost mini" data-act="unign" data-id="${it.id}" data-k="${c.k}">Terugzetten</button></li>`).join('');
   return `<ul class="changes">${act}${ign}</ul>`;
 }
@@ -571,7 +576,7 @@ function linkTo(it, res) {
   ignore(it.li, 'link', res);
   it.status = 'match'; it.gp = res; it.reason = 'jouw koppeling'; it.choice = ''; it.cands = [];
   it.linking = false; it.sel = false; it.changes = [];
-  applyChanges(it, state.gByRes.get(res));
+  applyChanges(it, state.gByRes.get(res)); autoTick(it);
 }
 function unlink(it) {
   unignore(it.li, 'link');
@@ -582,6 +587,39 @@ $('#list').addEventListener('input', e => {
   const it = state.items[+t.dataset.id]; if (!it) return;
   it.linkQ = t.value;
   const box = document.getElementById('lr-' + it.id); if (box) box.innerHTML = linkResults(it);
+});
+
+/* ---------- LinkedIn-link automatisch aanvinken ---------- */
+let autoUrl = true;
+try { autoUrl = localStorage.getItem('li2g.autoUrl') !== '0'; } catch (e) {}
+$('#autoUrl').checked = autoUrl;
+function emailDomainWords(gp) {
+  return (gp.emailAddresses || []).map(e => normText(((e.value || '').split('@')[1] || '').split('.').slice(0, -1).join(' '))).join(' ');
+}
+// Zeker = e-mailadres komt overeen, jij hebt zelf gekoppeld, of: naam klopt én bedrijf klopt (in Google-organisatie of e-maildomein)
+function isConfident(it, gp) {
+  if (!gp) return false;
+  if (it.status === 'doubt') return !!(it.choice && it.choice !== 'new');
+  if (['e-mail', 'jouw koppeling', 'jouw eerdere koppeling'].includes(it.reason)) return true;
+  if (it.reason !== 'naam' || !it.li.company) return false;
+  if ((gp.organizations || []).some(o => sameCompany(it.li.company, o.name))) return true;
+  const co = words(it.li.company).filter(t => !LEGAL.has(t)).join('');
+  const dom = emailDomainWords(gp).replace(/ /g, '');
+  return co.length > 3 && dom.length > 3 && (dom.includes(co) || co.includes(dom));
+}
+function autoTick(it) {
+  if (it.result?.ok) return;
+  const c = it.changes.find(x => x.k === 'url'); if (!c) return;
+  const res = targetRes(it);
+  c.auto = isConfident(it, res ? state.gByRes.get(res) : null);
+  if (c.auto) c.on = autoUrl;
+  it.sel = it.changes.some(x => x.on);
+}
+$('#autoUrl').addEventListener('change', e => {
+  autoUrl = e.target.checked;
+  try { localStorage.setItem('li2g.autoUrl', autoUrl ? '1' : '0'); } catch (err) {}
+  state.items.forEach(it => { const c = it.changes.find(x => x.k === 'url' && x.auto); if (c && !it.result?.ok) { c.on = autoUrl; it.sel = it.changes.some(x => x.on); } });
+  render();
 });
 
 /* ---------- interactie ---------- */
@@ -597,6 +635,7 @@ $('#list').addEventListener('change', e => {
     if (res) ignore(it.li, 'link', res); else unignore(it.li, 'link');
     applyChanges(it, res ? state.gByRes.get(res) : null);
     it.sel = it.choice === 'new';
+    if (res) autoTick(it);
   }
   render();
 });
