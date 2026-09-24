@@ -60,6 +60,10 @@ s{color:var(--mut)}
 [hidden]{display:none!important}
 button.mini{font-size:12px;padding:2px 8px;margin-left:8px}
 li.ign{color:var(--mut)}
+.linkbox{margin-top:8px;max-width:620px}
+.linkbox input{width:100%;margin-bottom:6px}
+button.pick{display:block;width:100%;text-align:left;background:var(--bg);color:var(--fg);border:1px solid var(--line);margin:4px 0;padding:6px 10px}
+button.pick:hover{border-color:var(--acc)}
 </style>
 </head>
 <body>
@@ -276,9 +280,15 @@ function words(s) {
 }
 function nameWords(s) { const w = words(s); const f = w.filter(t => !TITLES.has(t)); return f.length ? f : w; }
 const cleanLast = s => (s || '').split(',')[0];
+const PARTICLES = new Set(['de','van','der','den','het','ten','ter','te','t','in','op','la','le','du','von','di','da','dos','del','zu','vd','v']);
 function keysFor(first, last) {
   const f = nameWords(first), l = nameWords(cleanLast(last));
-  return { full: f.concat(l).join(''), fuzzy: f.length && l.length ? f[0] + '|' + l[l.length - 1] : '' };
+  const all = f.concat(l), core = all.filter(w => !PARTICLES.has(w));
+  const lCore = l.filter(w => !PARTICLES.has(w));
+  return {
+    full: (core.length ? core : all).slice().sort().join(' '),
+    fuzzy: f.length && lCore.length ? f[0] + '|' + lCore[lCore.length - 1] : ''
+  };
 }
 const normText = s => words(s).join(' ');
 function sameCompany(a, b) {
@@ -392,6 +402,7 @@ function refreshItem(it) {
 
 function maybeCompare() {
   if (!state.google || !state.li) return;
+  gHay = new Map();
   const add = (m, k, p) => { if (!k) return; if (!m.has(k)) m.set(k, []); if (!m.get(k).includes(p)) m.get(k).push(p); };
   const byEmail = new Map(), byUrl = new Map(), byName = new Map(), byFuzzy = new Map();
   for (const p of state.google) {
@@ -402,6 +413,8 @@ function maybeCompare() {
   state.items = state.li.map((li, id) => {
     const it = { id, li, status: 'new', gp: null, cands: [], reason: '', changes: [], ignChanges: [], sel: false, choice: '', result: null };
     const k = keysFor(li.first, li.last);
+    const linked = ignored[personKey(li)]?.link;
+    if (linked && state.gByRes.has(linked)) { it.status = 'match'; it.gp = linked; it.reason = 'jouw eerdere koppeling'; return it; }
     const tries = [['e-mail', byEmail.get(li.email.toLowerCase())], ['LinkedIn-link', byUrl.get(liSlug(li.url))], ['naam', byName.get(k.full)]];
     for (const [why, hits] of tries) {
       if (!hits || !hits.length) continue;
@@ -487,10 +500,14 @@ function rowHtml(it) {
   const cb = `<input type="checkbox" data-act="sel" data-id="${it.id}" ${it.sel ? 'checked' : ''} ${done ? 'disabled' : ''}>`;
   const cls = `item ${done ? 'done' : ''}`;
   const c = cat(it);
+  const linkBtn = done ? '' : `<button class="ghost mini" data-act="linkopen" data-id="${it.id}">${it.linking ? 'Zoeken sluiten' : 'Koppelen aan bestaand contact…'}</button>`;
+  const linkBox = it.linking && !done ? `<div class="sub linkbox"><input type="search" data-act="linkq" data-id="${it.id}" value="${esc(it.linkQ || '')}" placeholder="Zoek in je Google-contacten op naam, e-mail of bedrijf">
+      <div id="lr-${it.id}">${linkResults(it)}</div></div>` : '';
+  const unlinkBtn = !done && it.status === 'match' && /koppeling/.test(it.reason) ? `<button class="ghost mini" data-act="unlink" data-id="${it.id}">Ontkoppelen</button>` : '';
   const ignP = done ? '' : `<button class="ghost mini" data-act="ignp" data-id="${it.id}">${it.status === 'new' ? 'Nooit toevoegen' : 'Niet meer voorstellen'}</button>`;
   if (c === 'same') {
     const gp = state.gByRes.get(it.gp);
-    return `<div class="${cls}"><div class="head"><span class="name">${name}</span>${link}<span class="badge">via ${esc(it.reason)}</span></div>
+    return `<div class="${cls}"><div class="head"><span class="name">${name}</span>${link}<span class="badge">via ${esc(it.reason)}</span>${unlinkBtn}</div>
       <div class="sub">Google: ${esc(gName(gp))} · ${esc(fmtOrg(primaryOrg(gp)?.title, primaryOrg(gp)?.name))}</div></div>`;
   }
   if (c === 'ignored') {
@@ -503,35 +520,81 @@ function rowHtml(it) {
       <div class="sub">In Google als: ${esc(gName(gp))}</div>${changesHtml(it)}</div>`;
   }
   if (c === 'new') {
-    return `<div class="${cls}"><div class="head"><label>${cb} <span class="name">${name}</span></label>${link}${resultBadge(it)}${ignP}</div>
-      <div class="sub">${liLine(li)}</div></div>`;
+    return `<div class="${cls}"><div class="head"><label>${cb} <span class="name">${name}</span></label>${link}${resultBadge(it)}${linkBtn}${ignP}</div>
+      <div class="sub">${liLine(li)}</div>${linkBox}</div>`;
   }
   if (c === 'doubt') {
     const opts = it.cands.map(r => { const p = state.gByRes.get(r); const o = primaryOrg(p);
       const extra = [fmtOrg(o?.title, o?.name), p.emailAddresses?.[0]?.value].filter(x => x && x !== '—').join(', ');
       return `<option value="${esc(r)}" ${it.choice === r ? 'selected' : ''}>${esc(gName(p))}${extra ? ' — ' + esc(extra) : ''}</option>`; }).join('');
     const chosen = it.choice && it.choice !== 'new';
-    return `<div class="${cls}"><div class="head"><label>${cb} <span class="name">${name}</span></label>${link}<span class="badge warn">${esc(it.reason)}</span>${resultBadge(it)}${ignP}</div>
-      <div class="sub">LinkedIn: ${liLine(li)}</div>
+    return `<div class="${cls}"><div class="head"><label>${cb} <span class="name">${name}</span></label>${link}<span class="badge warn">${esc(it.reason)}</span>${resultBadge(it)}${linkBtn}${ignP}</div>
+      <div class="sub">LinkedIn: ${liLine(li)}</div>${linkBox}
       <div class="sub"><select data-act="choice" data-id="${it.id}" ${done ? 'disabled' : ''}>
         <option value="">— overslaan —</option>${opts}<option value="new" ${it.choice === 'new' ? 'selected' : ''}>➕ Nieuw contact aanmaken</option></select></div>
       ${chosen ? (it.changes.length || it.ignChanges.length ? changesHtml(it) : '<div class="sub">Dit contact is al up-to-date.</div>') : ''}</div>`;
   }
   const gp = state.gByRes.get(it.gp);
-  return `<div class="${cls}"><div class="head"><label>${cb} <span class="name">${name}</span></label>${link}<span class="badge">via ${esc(it.reason)}</span>${resultBadge(it)}</div>
+  return `<div class="${cls}"><div class="head"><label>${cb} <span class="name">${name}</span></label>${link}<span class="badge">via ${esc(it.reason)}</span>${resultBadge(it)}${unlinkBtn}</div>
     <div class="sub">In Google als: ${esc(gName(gp))}</div>${changesHtml(it)}</div>`;
 }
+
+/* ---------- handmatig koppelen ---------- */
+let gHay = new Map();
+function hayFor(p) {
+  if (!gHay.has(p.resourceName)) {
+    const bits = [];
+    (p.names || []).forEach(n => bits.push(n.displayName, n.givenName, n.middleName, n.familyName));
+    (p.emailAddresses || []).forEach(e => bits.push(e.value));
+    (p.organizations || []).forEach(o => bits.push(o.name, o.title));
+    gHay.set(p.resourceName, normText(bits.filter(Boolean).join(' ')));
+  }
+  return gHay.get(p.resourceName);
+}
+function defaultLinkQ(li) {
+  const l = nameWords(cleanLast(li.last)).filter(w => !PARTICLES.has(w));
+  return l.length ? l[l.length - 1] : nameWords(li.first)[0] || '';
+}
+function linkResults(it) {
+  const q = normText(it.linkQ || '').split(' ').filter(Boolean);
+  if (!q.length) return '<div class="status">Typ een naam om te zoeken.</div>';
+  const hits = state.google.filter(p => { const h = hayFor(p); return q.every(w => h.includes(w)); });
+  if (!hits.length) return '<div class="status">Geen Google-contact gevonden. Probeer een ander deel van de naam of het e-mailadres.</div>';
+  const shown = hits.slice(0, 8).map(p => {
+    const o = primaryOrg(p);
+    const extra = [fmtOrg(o?.title, o?.name), p.emailAddresses?.[0]?.value].filter(x => x && x !== '—').join(' · ');
+    return `<button class="pick" data-act="linkto" data-id="${it.id}" data-res="${esc(p.resourceName)}"><b>${esc(gName(p))}</b>${extra ? ' <span class="status">' + esc(extra) + '</span>' : ''}</button>`;
+  }).join('');
+  return shown + (hits.length > 8 ? `<div class="status">…en nog ${hits.length - 8}. Typ meer om te verfijnen.</div>` : '');
+}
+function linkTo(it, res) {
+  ignore(it.li, 'link', res);
+  it.status = 'match'; it.gp = res; it.reason = 'jouw koppeling'; it.choice = ''; it.cands = [];
+  it.linking = false; it.sel = false; it.changes = [];
+  applyChanges(it, state.gByRes.get(res));
+}
+function unlink(it) {
+  unignore(it.li, 'link');
+  it.status = 'new'; it.gp = null; it.reason = ''; it.changes = []; it.ignChanges = []; it.sel = false;
+}
+$('#list').addEventListener('input', e => {
+  const t = e.target; if (t.dataset.act !== 'linkq') return;
+  const it = state.items[+t.dataset.id]; if (!it) return;
+  it.linkQ = t.value;
+  const box = document.getElementById('lr-' + it.id); if (box) box.innerHTML = linkResults(it);
+});
 
 /* ---------- interactie ---------- */
 $('#tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b) { state.tab = b.dataset.tab; render(); } });
 $('#search').addEventListener('input', e => { state.q = e.target.value; render(); });
 $('#list').addEventListener('change', e => {
-  const t = e.target, it = state.items[+t.dataset.id]; if (!it) return;
+  const t = e.target, it = state.items[+t.dataset.id]; if (!it || t.dataset.act === 'linkq') return;
   if (t.dataset.act === 'sel') { it.sel = t.checked; it.changes.forEach(c => c.on = t.checked); }
   if (t.dataset.act === 'chg') { it.changes[+t.dataset.i].on = t.checked; it.sel = it.changes.some(c => c.on); }
   if (t.dataset.act === 'choice') {
     it.choice = t.value;
     const res = targetRes(it);
+    if (res) ignore(it.li, 'link', res); else unignore(it.li, 'link');
     applyChanges(it, res ? state.gByRes.get(res) : null);
     it.sel = it.choice === 'new';
   }
@@ -545,6 +608,21 @@ $('#list').addEventListener('click', e => {
   if (a === 'unign') unignore(it.li, b.dataset.k);
   if (a === 'ignp') { ignore(it.li, 'person', true); it.sel = false; }
   if (a === 'unignp') unignore(it.li, 'person');
+  if (a === 'linkopen') {
+    it.linking = !it.linking;
+    if (it.linking && it.linkQ == null) it.linkQ = defaultLinkQ(it.li);
+    render();
+    if (it.linking) { const inp = document.querySelector(`input[data-act=linkq][data-id="${it.id}"]`); if (inp) { inp.focus(); inp.select(); } }
+    return;
+  }
+  if (a === 'linkto') {
+    const p = state.gByRes.get(b.dataset.res);
+    linkTo(it, b.dataset.res);
+    render();
+    $('#tabHint').textContent = `✓ ${[it.li.first, it.li.last].join(' ')} is gekoppeld aan “${gName(p)}” en staat nu onder ${cat(it) === 'changes' ? 'Wijzigingen' : cat(it) === 'same' ? 'Up-to-date' : 'Genegeerd'}. De app onthoudt deze koppeling.`;
+    return;
+  }
+  if (a === 'unlink') unlink(it);
   state.items.forEach(refreshItem);
   render();
 });
@@ -599,7 +677,7 @@ async function doUpdate(it, onWait) {
     const { body, fields } = buildUpdate(it, gp);
     try {
       const p = await api(`${res}:updateContact?updatePersonFields=${fields.join(',')}&personFields=${FIELDS}`, { method: 'PATCH', body, onWait });
-      state.gByRes.set(res, p);
+      state.gByRes.set(res, p); gHay.delete(res);
       const idx = state.google.findIndex(x => x.resourceName === res); if (idx >= 0) state.google[idx] = p;
       return fields.length + ' veld(en) bijgewerkt';
     } catch (e) {

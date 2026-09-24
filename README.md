@@ -56,6 +56,7 @@ Het kan tot 5 minuten duren voordat een nieuwe JavaScript-bron werkt. Krijg je `
 3. **Stap 2:** sleep `Connections.csv` in het vak.
 4. **Stap 3:** loop de tabbladen door. **Er staat nergens iets vooraf aangevinkt**: alleen wat jij aanvinkt wordt doorgevoerd.
    - **Wijzigingen:** de persoon staat al in Google en LinkedIn heeft nieuwere gegevens (functie/werkgever, LinkedIn-link, e-mail). Vink de persoon aan (dan gaan alle velden mee) of vink losse velden aan.
+   - **Koppelen aan bestaand contact…** (bij Nieuw en Twijfelgevallen): herkent de app iemand niet, maar staat hij wél in Google Contacts, klik dan op deze knop, zoek op naam, e-mail of bedrijf en kies het juiste contact. De persoon verhuist naar Wijzigingen. De app onthoudt de koppeling (en ziet hem ook via de LinkedIn-link als je die meeneemt). Verkeerd gekoppeld? Klik **Ontkoppelen**.
    - **Twijfelgevallen:** meerdere contacten met dezelfde naam, of een naam die er alleen op lijkt (bijvoorbeeld "Eva Mulder" en "Eva van Mulder"). Kies het juiste contact, kies **Nieuw contact aanmaken**, of laat het op overslaan staan.
    - **Nieuw:** de persoon staat nog niet in Google. Vink aan wie je wilt toevoegen. Nieuwe contacten krijgen het label **LinkedIn**, zodat je ze makkelijk terugvindt.
    - **Up-to-date:** hier hoeft niets te gebeuren.
@@ -78,6 +79,7 @@ Draai het elk kwartaal opnieuw met een verse LinkedIn-export. Contacten die je a
 
 - De app **voegt alleen toe of werkt bij**. Hij verwijdert nooit contacten of gegevens. Een nieuwe functie vervangt wel de oude functie/werkgever bij dat contact. Andere velden, zoals telefoon, adres en notities, blijven onaangeraakt.
 - De app **past nooit namen aan** in Google Contacts. Een naam als "Jeroen (vader Faas) Jansen" blijft dus precies zo staan.
+- Namen vergelijken: de volgorde van de woorden en tussenvoegsels (de, van, der…) tellen niet mee, dus "Willem Vries de" op LinkedIn = "Willem de Vries" in Google.
 - Koppelen gaat in deze volgorde: e-mailadres → LinkedIn-link → naam. Bij het vergelijken van namen maakt het niet uit of je hoofd- of kleine letters gebruikt (jeroen jansen = Jeroen Jansen), en ook accenten (é = e) tellen niet mee. Tekst tussen haakjes wordt genegeerd, net als titels zoals "MBA" of "Ir.". Twijfelt de app, dan beslist hij niets zelf; zo'n persoon komt onder Twijfelgevallen. Dat gebeurt bijvoorbeeld als twee LinkedIn-connecties dezelfde naam hebben.
 - **De app onthoudt koppelingen via de LinkedIn-link.** Als je een wijziging doorvoert, zet de app de LinkedIn-link van die persoon in het Google-contact. Bij een volgende export herkent de app hem daaraan, hoe je hem in Google ook genoemd hebt. Dat onthouden gebeurt in Google zelf, dus het werkt ook op een andere computer. Laat het vinkje bij **LinkedIn-link** daarom aan staan.
 - Je Client-ID wordt in je browser onthouden. Contactgegevens worden nergens opgeslagen: ververs je de pagina, dan zijn ze weg.
