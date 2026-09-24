@@ -143,7 +143,12 @@ const state = { token: null, tokenExp: 0, google: null, gByRes: new Map(), li: n
 /* ---------- instellingen ---------- */
 const DEFAULT_CLIENT_ID = '21208591537-p1ks36o6n09i6pik7m2nua7mtg10u2ru.apps.googleusercontent.com';
 $('#clientId').value = DEFAULT_CLIENT_ID;
-try { $('#clientId').value = localStorage.getItem('li2g.clientId') || DEFAULT_CLIENT_ID; } catch (e) {}
+const validId = v => /^\d+-[a-z0-9]+\.apps\.googleusercontent\.com$/i.test((v || '').trim());
+try {
+  const saved = localStorage.getItem('li2g.clientId');
+  if (validId(saved)) $('#clientId').value = saved.trim();
+  else localStorage.removeItem('li2g.clientId');
+} catch (e) {}
 $('#clientId').addEventListener('change', () => {
   try { localStorage.setItem('li2g.clientId', $('#clientId').value.trim()); } catch (e) {}
 });
@@ -154,7 +159,7 @@ function setStatus(el, text, cls = '') { el.textContent = text; el.className = '
 let tokenClient = null, tokenClientId = '', pending = null;
 function initClient() {
   const id = $('#clientId').value.trim();
-  if (!id) throw new Error('Vul eerst je OAuth Client-ID in.');
+  if (!validId(id)) { $('#clientId').value = DEFAULT_CLIENT_ID; try { localStorage.removeItem('li2g.clientId'); } catch (e) {} throw new Error('Het Client-ID-vak bevatte geen geldige Client-ID; ik heb de juiste teruggezet. Klik nog een keer op Inloggen.'); }
   if (!window.google?.accounts?.oauth2) throw new Error('Het Google-inlogscript is nog niet geladen. Wacht een paar seconden en probeer opnieuw.');
   if (tokenClient && tokenClientId === id) return;
   tokenClientId = id;
