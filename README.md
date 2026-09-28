@@ -95,3 +95,15 @@ Draai het elk kwartaal opnieuw met een verse LinkedIn-export. Contacten die je a
 | `People API has not been used in project…` | De People API staat niet aan (Deel 2 stap 2), of er stond een ander project geselecteerd. |
 | Er gebeurt niets bij inloggen | Zet de pop-upblokkering uit voor je github.io-adres. |
 | Werkt niet als je `index.html` dubbelklikt | Dat klopt. Google-inlog werkt alleen vanaf het GitHub Pages-adres. |
+
+---
+
+## Contactenkaart (`kaart.html`)
+
+Een tweede pagina die al je Google-contacten met een adres op een kaart zet. Zet `kaart.html` naast `index.html` in je repo; hij gebruikt dezelfde Google-inlog en er hoeft in Google Cloud niets extra ingesteld te worden. Je opent hem via de link bovenaan de app, of direct via `…/linkedin-google-contacts/kaart.html`.
+
+- Klik **Inloggen en contacten op de kaart zetten**. De eerste keer duurt het even: elk adres wordt omgezet naar een plek op de kaart (Nederlandse adressen via PDOK van het Kadaster, buitenlandse via OpenStreetMap — die laatste max. 1 per seconde). Alleen de adrestekst gaat daarheen, geen namen. De uitkomsten worden in je browser onthouden, dus de volgende keer is de kaart direct klaar.
+- Klik op een punt voor naam, bedrijf, adres, telefoon en e-mail, met links naar **Google Contacts**, **LinkedIn** en **Route**.
+- Zoek op naam, bedrijf, straat of plaats, of filter op een **label** (bijvoorbeeld "Bussum").
+- Adressen die niet gevonden werden staan onder de zoekbalk, met een link om ze in Google Contacts te verbeteren.
+- De kaart leest alleen; hij verandert niets in je contacten.
