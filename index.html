@@ -55,6 +55,15 @@ ul.changes li{font-size:16px;margin:8px 0}
 .cmp .old{color:var(--err);background:var(--errbg)}
 .cmp .new{color:var(--ok);background:var(--okbg);font-weight:600}
 .cmp .none{color:var(--mut);font-style:italic}
+.ogrid{display:grid;grid-template-columns:46px minmax(0,1.4fr) minmax(0,1fr);gap:4px 10px;margin:4px 0 0 27px;align-items:start;max-width:900px}
+.ogrid .h{font-size:13px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
+.ogrid .tag{font-size:14px;color:var(--mut);padding-top:3px}
+.ogrid .old,.ogrid .new,.ogrid .same{display:inline-block;padding:1px 7px;border-radius:5px}
+.ogrid .old{color:var(--err);background:var(--errbg)}
+.ogrid .new{color:var(--ok);background:var(--okbg);font-weight:600}
+.ogrid .same{color:var(--mut)}
+.ogrid .none{color:var(--mut);font-style:italic}
+@media (max-width:600px){.ogrid{grid-template-columns:40px 1fr 1fr;margin-left:0}}
 s{color:var(--mut)}
 .empty{color:var(--mut);padding:16px 2px}
 .applybar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:12px 16px}
@@ -391,7 +400,13 @@ function diff(li, gp) {
   const ch = [];
   const o = primaryOrg(gp);
   if ((li.company && !sameCompany(li.company, o?.name)) || (li.position && normText(li.position) !== normText(o?.title))) {
-    ch.push({ k: 'org', label: 'Functie/werkgever', from: fmtOrg(o?.title, o?.name), to: fmtOrg(li.position || o?.title, li.company || o?.name), on: false });
+    const titleChanged = !!li.position && normText(li.position) !== normText(o?.title);
+    const companyChanged = !!li.company && !sameCompany(li.company, o?.name);
+    const toTitle = titleChanged ? li.position : (o?.title || li.position || '');
+    const toCompany = companyChanged ? li.company : (o?.name || li.company || '');
+    ch.push({ k: 'org', label: 'Functie/werkgever', from: fmtOrg(o?.title, o?.name), to: fmtOrg(li.position || o?.title, li.company || o?.name), on: false,
+      fromTitle: o?.title || '', fromCompany: o?.name || '', toTitle, toCompany,
+      titleChanged: titleChanged || (!o?.title && !!toTitle), companyChanged: companyChanged || (!o?.name && !!toCompany) });
   }
   const slug = liSlug(li.url);
   if (slug && !(gp.urls || []).some(u => liSlug(u.value) === slug)) ch.push({ k: 'url', label: 'LinkedIn-link', from: '', to: li.url, on: false });
@@ -503,12 +518,18 @@ function liLine(li) {
   if (li.connectedOn) bits.push('verbonden ' + li.connectedOn);
   return bits.map(esc).join(' · ');
 }
+function orgGrid(c) {
+  const cell = (v, changed, cls) => !v ? '<span class="none">(leeg)</span>' : `<span class="${changed ? cls : 'same'}">${esc(v)}</span>`;
+  return `<div class="ogrid"><span></span><span class="h">Functie</span><span class="h">Werkgever</span>
+    <span class="tag">nu</span><div>${cell(c.fromTitle, c.titleChanged, 'old')}</div><div>${cell(c.fromCompany, c.companyChanged, 'old')}</div>
+    <span class="tag">wordt</span><div>${cell(c.toTitle, c.titleChanged, 'new')}</div><div>${cell(c.toCompany, c.companyChanged, 'new')}</div></div>`;
+}
 function changesHtml(it) {
   const done = it.result?.ok;
   const act = it.changes.map((c, i) => `<li><label><input type="checkbox" data-act="chg" data-id="${it.id}" data-i="${i}" ${c.on ? 'checked' : ''} ${done ? 'disabled' : ''}>
     <b>${esc(c.label)}</b></label>${c.auto && c.on && !done ? ' <span class="badge ok">zekere koppeling</span>' : ''}${done ? '' : `<button class="ghost mini" data-act="ign" data-id="${it.id}" data-i="${i}">Niet meer voorstellen</button>`}
-    <div class="cmp"><span class="tag">nu</span>${c.from && c.from !== '—' ? `<span class="old">${esc(c.from)}</span>` : '<span class="none">(leeg)</span>'}</div>
-    <div class="cmp"><span class="tag">wordt</span><span class="new">${esc(c.to)}</span></div></li>`).join('');
+    ${c.k === 'org' ? orgGrid(c) : `<div class="cmp"><span class="tag">nu</span>${c.from && c.from !== '—' ? `<span class="old">${esc(c.from)}</span>` : '<span class="none">(leeg)</span>'}</div>
+    <div class="cmp"><span class="tag">wordt</span><span class="new">${esc(c.to)}</span></div>`}</li>`).join('');
   const ign = done ? '' : (it.ignChanges || []).map(c => `<li class="ign">Genegeerd — ${esc(c.label)}: ${esc(c.to)}<button class="ghost mini" data-act="unign" data-id="${it.id}" data-k="${c.k}">Terugzetten</button></li>`).join('');
   return `<ul class="changes">${act}${ign}</ul>`;
 }
@@ -715,7 +736,8 @@ function buildUpdate(it, gp) {
   const body = { etag: gp.etag }, fields = [];
   if (on.has('org')) {
     const orgs = strip(gp.organizations), cur = primaryOrg(gp), i = cur ? (gp.organizations || []).indexOf(cur) : -1;
-    const next = { name: it.li.company || cur?.name || '', title: it.li.position || cur?.title || '', current: true };
+    const oc = it.changes.find(c => c.k === 'org');
+    const next = { name: oc?.toCompany ?? (it.li.company || cur?.name || ''), title: oc?.toTitle ?? (it.li.position || cur?.title || ''), current: true };
     if (i >= 0) orgs[i] = { ...orgs[i], ...next }; else orgs.unshift(next);
     body.organizations = orgs; fields.push('organizations');
   }
