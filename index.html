@@ -48,7 +48,13 @@ button:disabled{opacity:.45;cursor:default}
 .badge.err{background:var(--errbg);color:var(--err)}
 .sub{font-size:15px;color:var(--mut);margin:3px 0 0 26px}
 ul.changes{list-style:none;margin:6px 0 0 26px;padding:0}
-ul.changes li{font-size:16px;margin:3px 0}
+ul.changes li{font-size:16px;margin:8px 0}
+.cmp{display:flex;gap:8px;align-items:baseline;margin:3px 0 0 27px}
+.cmp .tag{flex:0 0 46px;font-size:14px;color:var(--mut)}
+.cmp .old,.cmp .new{padding:1px 7px;border-radius:5px}
+.cmp .old{color:var(--err);background:var(--errbg)}
+.cmp .new{color:var(--ok);background:var(--okbg);font-weight:600}
+.cmp .none{color:var(--mut);font-style:italic}
 s{color:var(--mut)}
 .empty{color:var(--mut);padding:16px 2px}
 .applybar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:12px 16px}
@@ -500,7 +506,9 @@ function liLine(li) {
 function changesHtml(it) {
   const done = it.result?.ok;
   const act = it.changes.map((c, i) => `<li><label><input type="checkbox" data-act="chg" data-id="${it.id}" data-i="${i}" ${c.on ? 'checked' : ''} ${done ? 'disabled' : ''}>
-    ${esc(c.label)}: ${c.from ? `<s>${esc(c.from)}</s> → ` : '+ '}<b>${esc(c.to)}</b></label>${c.auto && c.on && !done ? ' <span class="badge ok">zekere koppeling</span>' : ''}${done ? '' : `<button class="ghost mini" data-act="ign" data-id="${it.id}" data-i="${i}">Niet meer voorstellen</button>`}</li>`).join('');
+    <b>${esc(c.label)}</b></label>${c.auto && c.on && !done ? ' <span class="badge ok">zekere koppeling</span>' : ''}${done ? '' : `<button class="ghost mini" data-act="ign" data-id="${it.id}" data-i="${i}">Niet meer voorstellen</button>`}
+    <div class="cmp"><span class="tag">nu</span>${c.from && c.from !== '—' ? `<span class="old">${esc(c.from)}</span>` : '<span class="none">(leeg)</span>'}</div>
+    <div class="cmp"><span class="tag">wordt</span><span class="new">${esc(c.to)}</span></div></li>`).join('');
   const ign = done ? '' : (it.ignChanges || []).map(c => `<li class="ign">Genegeerd — ${esc(c.label)}: ${esc(c.to)}<button class="ghost mini" data-act="unign" data-id="${it.id}" data-k="${c.k}">Terugzetten</button></li>`).join('');
   return `<ul class="changes">${act}${ign}</ul>`;
 }
